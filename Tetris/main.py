@@ -15,7 +15,6 @@ pygame.init()
 #Pygame Screen Caption Name
 pygame.display.set_caption('Tetris') 
 
-
 #Colors
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -32,8 +31,8 @@ pygame.mixer.init()
 move_SFX = pygame.mixer.Sound('move.wav')#When moving block pieces
 clear_SFX = pygame.mixer.Sound('clear.wav') #When row is cleared
 #Adjust volume
-move_SFX.set_volume(0.07)
-clear_SFX.set_volume(0.06)
+move_SFX.set_volume(0.05)
+clear_SFX.set_volume(0.05)
 
 #Initialize Global Variables
 screen_width = 800
@@ -204,9 +203,9 @@ def drawGrid(surface, grid):
 #Function takes shape as parameter & convert to readable positions
 def convertShapeFormat(shape):
   positions = []
-  format = shape.shape[shape.rotation % len(shape.shape)] #modulus finds sublists (specific shape) in shape lists
-
-  for i, line in enumerate(format): #Checks Lists' for zeros (0) for actual shape
+  format = shape.shape[shape.rotation % len(shape.shape)] #modulus to access sublists (specific shape) in shape lists
+  #Checks Lists' for zeros (0) for actual shape
+  for i, line in enumerate(format): 
       row = list(line) #get line in each row
       for j, column in enumerate(row): 
           if column == '0': #add that position to list when 0 found
@@ -222,7 +221,7 @@ def validSpace(shape, grid):
     accepted_pos = [[(j, i) for j in range(12) if grid[i][j] == (0,0,0)] for i in range(20)] #all possible positions in 10x20 grid 
     accepted_pos = [j for sub in accepted_pos for j in sub]
 
-    formatted = convertShapeFormat(shape) #call convert_shape_format to read all possible positions
+    formatted = convertShapeFormat(shape) #call shape format to read all possible positions
 
     for pos in formatted: #loop compares shapes pos & allowed positions which the shape is in
         if pos not in accepted_pos:
@@ -238,7 +237,7 @@ def checkLost(positions):
         if y < 1:
             return True #Execute function, Lost game
 
-    return False #function is left unexecuted & game stays running
+    return False #game stays running
  
 #Function passes random shape from shapes list to top of game screen (y Pos = 0)
 def getShape(): 
@@ -264,7 +263,7 @@ def clearRows(grid, locked):
             for j in range(len(row)):
                 try:
                     del locked[(j, i)] #remove locked pos (del row)
-                    clear_SFX.play() #play sound effect
+                    clear_SFX.play() #play sfx
                 except:
                     continue 
     #Shift every row
@@ -328,12 +327,11 @@ def mainGame():
     next_piece = getShape()
     clock = pygame.time.Clock()
     fall_time = 0
+    fall_speed = 0.30
     level_time = 0
     score = 0
  
     while runGame: 
-        fall_speed = 0.30
- 
         grid = createGrid(locked_positions)
         fall_time += clock.get_rawtime() #No FPS as it would mess up block piece speed 
         level_time += clock.get_rawtime()
@@ -342,7 +340,7 @@ def mainGame():
         if level_time/1000 > 5:
             level_time = 0
             if fall_speed > 0.12:
-                fall_speed -= 0.006
+                fall_speed -= 0.008
                  
  
         # Piece falling movment 
@@ -451,9 +449,9 @@ def instructions():
                 menuScreen()
 
         headerTitle = titleFont.render("HOW TO PLAY", False, WHITE)
-        infoTitle = font.render("Use left & right arrow keys to move block pieces.", False, WHITE)
+        infoTitle = font.render("Use left, right & down arrow keys to move block pieces.", False, WHITE)
         infoTitle2 = font.render("Use the Up arrow key to rotate your current block piece.", False, WHITE)
-        infoTitle3 = smallFont.render("Clear horizontal lines of blocks to score points, & Remember to not hit the top!", False, WHITE)
+        infoTitle3 = smallFont.render("Clear horizontal lines of blocks to score points, & Remember not to hit the top!", False, WHITE)
         
         headerRect = headerTitle.get_rect()
         infoRect = infoTitle.get_rect()

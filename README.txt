@@ -4,7 +4,7 @@ Made on VSCode
 
 Sources used:
 https://pythonprogramming.net/adding-sounds-music-pygame/ | Sounds found on: https://www.findsounds.com/
-Tetris grid: 
+Tetris grid: https://www.techwithtim.net/ 
 
 Progress Log (April)
 
@@ -69,12 +69,18 @@ added to fall speed of blocks by increasing speed as game goes on in mainGame
 
 4/9
 created main menu screen
-Title
-Buttons to play the game and view instructions
+-Game Title
+-Buttons to play the game and view instructions
 
 4/13
-Created instructions screen 
+added an instructions screen
+*add back button 
 
 4/15
 Checked code - renamed some variables to simple terms
 & adjusted comments
+
+4/16
+adjusted functionality 
+- speed of blocks (0.20 to 0.30)
+changed speed increase as game progresses
