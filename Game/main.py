@@ -59,6 +59,7 @@ block_height = screen_height // 7
 
 game_Rect = pygame.Rect(block_width, 3*block_height, block_width, block_height)
 help_Rect = pygame.Rect(block_width, 5*block_height, block_width, block_height)
+back_Rect = pygame.Rect(block_width, 5*block_height, block_width, block_height)
 
 """
 10 x 20 square grid
@@ -190,7 +191,8 @@ def createGrid(locked_pos={}): #represent grid using list of colors
 
     return grid
 
-def drawGrid(surface, grid): #Draws grid objects (square segments) to see grid & shape structure
+#Function draws grid objects (square segments) to see grid & shape structure
+def drawGrid(surface, grid): 
     sx = top_left_x
     sy = top_left_y
    
@@ -199,7 +201,8 @@ def drawGrid(surface, grid): #Draws grid objects (square segments) to see grid &
        for j in range(len(grid[i])): #Length of grid i (# of columns)
           pygame.draw.line(surface, GRAY, (sx + j*block_size, sy), (sx + j*block_size, sy + play_height)) #10 horizontal lines
 
-def convertShapeFormat(shape): #Takes shape as parameter & convert to can readable positions
+#Function takes shape as parameter & convert to readable positions
+def convertShapeFormat(shape):
   positions = []
   format = shape.shape[shape.rotation % len(shape.shape)] #modulus finds sublists (specific shape) in shape lists
 
@@ -214,7 +217,8 @@ def convertShapeFormat(shape): #Takes shape as parameter & convert to can readab
   
   return positions
  
-def validSpace(shape, grid): #Create all possible movable space
+#Function to create all possible movable space
+def validSpace(shape, grid): 
     accepted_pos = [[(j, i) for j in range(12) if grid[i][j] == (0,0,0)] for i in range(20)] #all possible positions in 10x20 grid 
     accepted_pos = [j for sub in accepted_pos for j in sub]
 
@@ -226,8 +230,9 @@ def validSpace(shape, grid): #Create all possible movable space
                 return False
 
     return True #if passes through nested loop
- 
-def checkLost(positions): #Checks if blocks reach/hit the top of screen (no available space, game lost) 
+
+#Function checks if blocks reach/hit the top of screen (game over) 
+def checkLost(positions): 
     for pos in positions:
         x, y = pos
         if y < 1:
@@ -235,7 +240,8 @@ def checkLost(positions): #Checks if blocks reach/hit the top of screen (no avai
 
     return False #function is left unexecuted & game stays running
  
-def getShape(): #passes random shape from shapes list to top of game screen (y Pos = 0)
+#Function passes random shape from shapes list to top of game screen (y Pos = 0)
+def getShape(): 
     global shapes, shape_colors
  
     return Piece(5, 0, random.choice(shapes))
@@ -246,10 +252,11 @@ def textMiddle(text, size, color, surface):
  
     surface.blit(label, (top_left_x + play_width/2 - (label.get_width() / 2), top_left_y + play_height/2 - label.get_height()/2))
 
-def clearRows(grid, locked): #Function checks when row cleard, shift every other row above down 
+#Function checks when row cleard, shift every other row above down 
+def clearRows(grid, locked): 
     inc = 0
     for i in range(len(grid)-1,-1,-1): #read grid bottom to top
-        row = grid[i] #every row
+        row = grid[i] #get all rows
         if (0, 0, 0) not in row: #if the color black (empty) is not present in a row
             inc += 1 #increment
             #add positions to remove from locked
@@ -272,9 +279,10 @@ def clearRows(grid, locked): #Function checks when row cleard, shift every other
  
 def nextShape(shape, surface):
     title = font.render('Next Shape', 1, WHITE)
- 
-    sx = top_left_x + play_width + 25
-    sy = top_left_y + play_height/2 - 100
+    #Positioning
+    sx = top_left_x + play_width + 25 
+    sy = top_left_y + play_height/2 - 200
+    #display next shape using modulus (to display default rotation)
     format = shape.shape[shape.rotation % len(shape.shape)]
  
     for i, line in enumerate(format):
@@ -293,8 +301,8 @@ def drawWindow(surface, score): #Game border with segments
 
     title = font.render('Score: ' +str(score), 1, WHITE) #Display score
  
-    sx = top_left_x + play_width + 25
-    sy = top_left_y + play_height/2 - 100
+    sx = top_left_x + play_width - 550
+    sy = top_left_y + play_height/2 - 380
 
     surface.blit(title, (sx + 10, sy + 150))
 
@@ -307,7 +315,8 @@ def drawWindow(surface, score): #Game border with segments
     pygame.draw.rect(surface, WHITE, (top_left_x, top_left_y, play_width, play_height), 5)
     pygame.display.update()
 
-def mainGame(): #Game running screen
+#Game screen function
+def mainGame(): 
     global grid
  
     locked_positions = {}  # (x,y):(255,0,0)
@@ -323,14 +332,14 @@ def mainGame(): #Game running screen
     score = 0
  
     while runGame: 
-        fall_speed = 0.27
+        fall_speed = 0.30
  
         grid = createGrid(locked_positions)
         fall_time += clock.get_rawtime() #No FPS as it would mess up block piece speed 
         level_time += clock.get_rawtime()
         clock.tick()
 
-        if level_time/1000 > 6:
+        if level_time/1000 > 5:
             level_time = 0
             if fall_speed > 0.12:
                 fall_speed -= 0.006
@@ -340,7 +349,7 @@ def mainGame(): #Game running screen
         if fall_time/1000 >= fall_speed:
             fall_time = 0
             current_piece.y += 1
-            if not (validSpace(current_piece, grid)) and current_piece.y > 0:
+            if not (validSpace(current_piece, grid)) and current_piece.y > 0: #when collides with another piece or ground
                 current_piece.y -= 1
                 change_piece = True
  
@@ -406,14 +415,40 @@ def mainGame(): #Game running screen
     pygame.display.update()
     pygame.time.delay(2000)
 
+#Instructions screen function
 def instructions():
     runHelp = True
+    #button state
+    button = 0
+    #mouse Position
+    mouseX = 0
+    mouseY = 0
     
     while runHelp:
         win.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 runHelp = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouseX, mouseY = event.pos
+                button = event.button
+
+            if event.type == pygame.MOUSEMOTION:
+                mouseX, mouseY = event.pos
+        
+        rect = back_Rect
+        pygame.draw.rect(screen, WHITE, rect)
+        text = font.render("Back", True, BLACK)
+        text_width, text_height = font.size("Back")
+        centre_width = (block_width - text_width)//2 #Text centering
+        centre_height = (block_height - text_height)//2 #Text centering
+        textRect = pygame.Rect(rect[0] + centre_width, rect[1] + centre_height, text_width, text_height)
+        screen.blit(text, textRect)
+
+        if back_Rect.collidepoint(mouseX, mouseY):
+            if button == 1: 
+                menuScreen()
 
         headerTitle = titleFont.render("HOW TO PLAY", False, WHITE)
         infoTitle = font.render("Use left & right arrow keys to move block pieces.", False, WHITE)
@@ -438,19 +473,18 @@ def instructions():
         pygame.display.update()
 
     pygame.quit()
- 
-def menuScreen(): #Main Menu
+
+#Main menu Function
+def menuScreen(): 
+    running = True
     #button state
     button = 0
     #mouse Position
     mouseX = 0
     mouseY = 0
 
-    running = True
     while running:
         win.fill(BLACK) #Window screen
-
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -477,12 +511,14 @@ def menuScreen(): #Main Menu
             textRect = pygame.Rect(rect[0] + centre_width, rect[1] + centre_height, text_width, text_height)
             screen.blit(text, textRect)
 
+        #Start Game
         if game_Rect.collidepoint(mouseX, mouseY):
-            if button == 1: #Start Game
+            if button == 1: 
                 mainGame() 
 
+        #View instructions
         if help_Rect.collidepoint(mouseX, mouseY):
-            if button == 1: #Start Game
+            if button == 1: 
                 instructions() 
         
         #Title
